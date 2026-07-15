@@ -1,105 +1,87 @@
 # Klarity
 
-A Document Summarization Tool
+A document summarization tool that extracts key sentences from PDFs and scanned images using NLP.
 
 ## Overview
 
-Klarity is a powerful document summarization tool designed to extract and condense the key information from documents. Whether you're dealing with lengthy reports, articles, or research papers, Klarity helps you quickly understand the main points without reading through everything.
+Klarity takes a PDF or image (PNG/JPEG) and returns a short extractive summary - the most information-dense sentences from the document, picked out using word-frequency scoring over nouns and verbs. Upload a document, get the core content back in seconds, no full read-through required.
 
-## Features
+## How it works
 
-- 📄 **Document Processing** - Upload and process various document formats
-- ⚡ **Quick Summarization** - Get concise summaries of lengthy documents
-- 🎯 **Key Point Extraction** - Identify and extract the most important information
-- 💡 **Easy to Use** - Intuitive user interface for seamless interaction
-- 🔄 **Flexible Output** - Generate summaries of different lengths and styles
+1. **Text extraction**
+   - PDFs: parsed directly with PyPDF2
+   - Images: run through Tesseract OCR (pytesseract) to extract text
+2. **Summarization**
+   - The extracted text is processed with spaCy (`en_core_web_sm`)
+   - Non-stopword nouns and verbs are frequency-scored
+   - Each sentence is scored by the sum of its words' frequency weights
+   - The top-scoring sentences (default: 3) are returned as the summary
 
-## Technology Stack
+This is a lightweight, explainable **extractive** approach - it selects and returns real sentences from the source text, rather than generating new text.
 
-- **Frontend**: HTML (75.5%)
-- **Backend**: Python (24.5%)
+## Tech Stack
+
+**Backend:** Python, Flask, Flask-CORS
+**NLP:** spaCy (`en_core_web_sm`)
+**Document parsing:** PyPDF2 (PDF), pytesseract + Pillow (OCR for images)
+**Frontend:** HTML, Tailwind CSS (CDN), vanilla JavaScript
+**Export:** jsPDF (client-side PDF generation for saving summaries)
 
 ## Getting Started
 
 ### Prerequisites
-
 - Python 3.7+
-- Modern web browser
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) installed locally (required for image-based summarization)
 
 ### Installation
 
-1. Clone the repository:
 ```bash
 git clone https://github.com/nehasingh47/Klarity.git
 cd Klarity
-```
-
-2. Install dependencies:
-```bash
 pip install -r requirements.txt
+python -m spacy download en_core_web_sm
 ```
 
-3. Run the application:
+> **Note:** `app.py` currently points to a hardcoded Tesseract path (`C:\Program Files\Tesseract-OCR\tesseract.exe`). If you're not on Windows, or installed Tesseract elsewhere, update the `pytesseract.pytesseract.tesseract_cmd` line in `app.py` to match your install path.
+
+### Running
+
 ```bash
 python app.py
 ```
 
-4. Open your browser and navigate to:
-```
-http://localhost:5000
-```
+Then open `http://localhost:5000` in your browser.
 
 ## Usage
 
-1. **Upload a Document** - Click the upload button and select your document
-2. **Configure Settings** - Choose summary length and style preferences
-3. **Generate Summary** - Click the summarize button to process your document
-4. **View Results** - Read the generated summary and key points
+1. Drop a PDF or image onto the upload zone (or click to browse)
+2. Klarity extracts the text and generates a summary
+3. Copy the summary or export it as a PDF
 
 ## Project Structure
 
 ```
 Klarity/
-├── app.py                 # Main application file
-├── templates/            # HTML templates
-├── static/              # CSS and JavaScript files
+├── app.py              # Flask app — text extraction + summarization logic
+├── templates/
+│   └── index.html      # Upload UI and result view
+├── static/              # (if applicable) CSS/JS assets
 ├── requirements.txt     # Python dependencies
-└── README.md           # This file
+└── README.md
 ```
 
-## Contributing
+## Known limitations
 
-Contributions are welcome! Here's how you can help:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is currently unlicensed. See the LICENSE file for more details.
-
-## Support
-
-If you encounter any issues or have questions, please:
-- Open an issue on the [GitHub Issues](https://github.com/nehasingh47/Klarity/issues) page
-- Check existing issues for solutions
-- Provide detailed information about your problem
+- Summary length is fixed at 3 sentences by default (not yet user-configurable in the UI)
+- OCR accuracy depends on image quality scanned or low-res documents may summarize poorly
+- Tesseract path is currently hardcoded for local development
 
 ## Roadmap
 
-- [ ] Support for multiple document formats (PDF, DOCX, etc.)
-- [ ] Advanced summarization algorithms
-- [ ] Batch processing capabilities
-- [ ] API endpoint for programmatic access
-- [ ] Multi-language support
+- Make summary length adjustable from the UI
+- Cross-platform Tesseract path handling
+- Support for DOCX input
 
 ## Author
 
 [nehasingh47](https://github.com/nehasingh47)
-
----
-
-**Klarity** - Making document understanding simple and efficient.
